@@ -21,7 +21,7 @@ const showGallery = images => {
 };
 form.addEventListener('submit', event => {
   event.preventDefault();
-  const inputText = event.currentTarget.elements.searchQuery.value;
+  const inputText = event.currentTarget.elements.searchImages.value;
   if (inputText.trim() === '') {
     Notiflix.Report.failure('Error. You must enter something.');
     questionValue = '';
@@ -32,17 +32,41 @@ form.addEventListener('submit', event => {
   currentPage = 1;
   fetchImages();
 });
+try {
+  const data = fetchImages();
+  if (data.hits.length === 0) {Notiflix.Report.failure(
+    'Sorry, there are no images matching your search query. Please try again.'
+  );
+   } else {
+    showGallery(data.hits);
+    if (currentPage === 1) {
+      Notiflix.Report.success(
+        `Hooray! We found ${data.totalHits} images.`  
+      );
+    }
+    if (data.totalHits <= currentPage * 40) {
+      loadMore.disabled = true;
+      Notiflix.Notify.failure(
+        "We're sorry, but you've reached the end of search results."
+      );
+    } else {
+      loadMore.disabled = false;
+      loadMore.style.display = 'block';
+    }
+  }
+} catch (error) {
+  
+}
 loadMore.addEventListener('click', () => {
   currentPage++;
   fetchImages();
-  const image = document.querySelector('.gallery');
+  const picture = document.querySelector('.gallery');
   if (gallery.firstElementChild) {
     const {height: cardHeight} =
-      image.firstElementChild.getBoundingClientRect();
+      picture.firstElementChild.getBoundingClientRect();
     window.scrollBy({
       top: cardHeight * 2,
       behavior: 'smooth',
     });
   }
 });
-export {showGallery, currentPage, questionValue, loadMore};
