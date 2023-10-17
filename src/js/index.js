@@ -31,6 +31,21 @@ form.addEventListener('submit', async event => {
   gallery.innerHTML = '';
   currentPage = 1;
   await getImages(questionValue, currentPage);
+  
+
+  loadMore.addEventListener('click', async event => {
+    event.preventDefault();
+    currentPage++;
+    await getImages(questionValue, currentPage);
+    if (gallery.firstElementChild) {
+      const { height: cardHeight } =
+        gallery.firstElementChild.getBoundingClientRect();
+      window.scrollBy({
+        top: cardHeight * 2,
+        behavior: 'smooth',
+      });
+    }
+  });
   async function getImages(questionValue, currentPage) {  try {
     const data = await fetchImages(questionValue, currentPage);
     if (data.hits.length === 0) {Notiflix.Report.failure(
@@ -57,18 +72,4 @@ form.addEventListener('submit', async event => {
     
   }}
 
-  });
-
-  loadMore.addEventListener('click', async event => {
-    event.preventDefault();
-    currentPage++;
-    await getImages(questionValue, currentPage);
-    if (gallery.firstElementChild) {
-      const { height: cardHeight } =
-        gallery.firstElementChild.getBoundingClientRect();
-      window.scrollBy({
-        top: cardHeight * 2,
-        behavior: 'smooth',
-      });
-    }
   });
