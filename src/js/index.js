@@ -30,7 +30,8 @@ form.addEventListener('submit', async event => {
   questionValue = inputText;
   gallery.innerHTML = '';
   currentPage = 1;
-  try {
+  await getImages(questionValue, currentPage);
+  async function getImages(questionValue, currentPage) {  try {
     const data = await fetchImages(questionValue, currentPage);
     if (data.hits.length === 0) {Notiflix.Report.failure(
       'Sorry, there are no images matching your search query. Please try again.'
@@ -54,19 +55,20 @@ form.addEventListener('submit', async event => {
     }
   } catch (error) {
     
-  }
-});
+  }}
 
-loadMore.addEventListener('click', event => {
-  event.preventDefault()
-  currentPage++;
-  fetchImages(questionValue, currentPage);
+  });
+
+  loadMore.addEventListener('click', async event => {
+    event.preventDefault();
+    currentPage++;
+    await getImages(questionValue, currentPage);
     if (gallery.firstElementChild) {
-    const {height: cardHeight} =
-      gallery.firstElementChild.getBoundingClientRect();
-    window.scrollBy({
-      top: cardHeight * 2,
-      behavior: 'smooth',
-    });
-  }
-});
+      const { height: cardHeight } =
+        gallery.firstElementChild.getBoundingClientRect();
+      window.scrollBy({
+        top: cardHeight * 2,
+        behavior: 'smooth',
+      });
+    }
+  });
