@@ -19,7 +19,7 @@ const showGallery = images => {
   const lightbox = new SimpleLightbox('.gallery a');
   lightbox.refresh();
 };
-form.addEventListener('submit', event => {
+form.addEventListener('submit', async event => {
   event.preventDefault();
   const inputText = event.currentTarget.elements.searchImages.value;
   if (inputText.trim() === '') {
@@ -30,40 +30,40 @@ form.addEventListener('submit', event => {
   questionValue = inputText;
   gallery.innerHTML = '';
   currentPage = 1;
-  fetchImages();
-});
-try {
-  const data = fetchImages();
-  if (data.hits.length === 0) {Notiflix.Report.failure(
-    'Sorry, there are no images matching your search query. Please try again.'
-  );
-   } else {
-    showGallery(data.hits);
-    if (currentPage === 1) {
-      Notiflix.Report.success(
-        `Hooray! We found ${data.totalHits} images.`  
-      );
+  try {
+    const data = await fetchImages(questionValue, currentPage);
+    if (data.hits.length === 0) {Notiflix.Report.failure(
+      'Sorry, there are no images matching your search query. Please try again.'
+    );
+     } else {
+      showGallery(data.hits);
+      if (currentPage === 1) {
+        Notiflix.Report.success(
+          `Hooray! We found ${data.totalHits} images.`  
+        );
+      }
+      if (data.totalHits <= currentPage * 40) {
+        loadMore.disabled = true;
+        Notiflix.Notify.failure(
+          "We're sorry, but you've reached the end of search results."
+        );
+      } else {
+        loadMore.disabled = false;
+        loadMore.style.display = 'block';
+      }
     }
-    if (data.totalHits <= currentPage * 40) {
-      loadMore.disabled = true;
-      Notiflix.Notify.failure(
-        "We're sorry, but you've reached the end of search results."
-      );
-    } else {
-      loadMore.disabled = false;
-      loadMore.style.display = 'block';
-    }
+  } catch (error) {
+    
   }
-} catch (error) {
-  
-}
-loadMore.addEventListener('click', () => {
+});
+
+loadMore.addEventListener('click', event => {
+  event.preventDefault()
   currentPage++;
-  fetchImages();
-  const picture = document.querySelector('.gallery');
-  if (gallery.firstElementChild) {
+  fetchImages(questionValue, currentPage);
+    if (gallery.firstElementChild) {
     const {height: cardHeight} =
-      picture.firstElementChild.getBoundingClientRect();
+      gallery.firstElementChild.getBoundingClientRect();
     window.scrollBy({
       top: cardHeight * 2,
       behavior: 'smooth',
